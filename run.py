@@ -95,7 +95,7 @@ async def upload(req: RequestInfo):
         path, content_type = result
         code = secrets.token_urlsafe(8)
         db.add_file(code, os.path.split(path)[-1], content_type)
-        return JsonResponse(200, {"url": "https://safe.sheppsu.me/view?n=%s" % code})
+        return JsonResponse(200, {"url": "https://media.sheppsu.me/view?n=%s" % code})
     return result
 
 
