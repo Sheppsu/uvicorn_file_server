@@ -41,7 +41,7 @@ class Database:
 
     def update_file_stats(self, code):
         cursor = self.db.cursor()
-        cursor.execute(f"UPDATE files SET views = views + 1, lastviewed = {round(time())} WHERE code = '{code}")
+        cursor.execute(f"UPDATE files SET views = views + 1, lastviewed = {round(time())} WHERE code = '{code}'")
         self.db.commit()
 
     def get_top_files(self, limit=10):
@@ -56,7 +56,7 @@ class Database:
 
     def get_mimetype_files(self, mimetype, limit=10):
         cursor = self.db.cursor()
-        cursor.execute(f"SELECT * FROM files WHERE content_type = {mimetype!r} LIMIT {limit}")
+        cursor.execute(f"SELECT * FROM files WHERE content_type = '{mimetype}' LIMIT {limit}")
         return map(FileInfo.from_data, cursor.fetchall())
 
     def print_files(self, files):
