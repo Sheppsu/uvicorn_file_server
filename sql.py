@@ -10,15 +10,15 @@ class Database:
 
     def add_file(self, code: str, filename: str, content_type: str):
         cursor = self.db.cursor()
-        cursor.execute(f"INSERT INTO files (code, filename, content_type) VALUES ({code!r}, {filename!r}, {content_type!r})")
+        cursor.execute(f"INSERT INTO files (code, filename, content_type) VALUES ('{code}', '{filename}', '{content_type}')")
         self.db.commit()
 
     def get_file(self, code):
         cursor = self.db.cursor()
-        cursor.execute(f"SELECT filename, content_type FROM files WHERE code = {code!r}")
+        cursor.execute(f"SELECT filename, content_type FROM files WHERE code = '{code}'")
         return cursor.fetchone()
 
     def update_file_stats(self, code):
         cursor = self.db.cursor()
-        cursor.execute(f"UPDATE files SET views = views + 1, lastviewed = {round(time())} WHERE code = {code!r}")
+        cursor.execute(f"UPDATE files SET views = views + 1, lastviewed = {round(time())} WHERE code = '{code}")
         self.db.commit()
