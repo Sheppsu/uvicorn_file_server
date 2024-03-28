@@ -2,7 +2,7 @@ from .response import Response
 from .routing import Router
 from .file_handling import FileHandler
 
-import asyncio
+from urllib.parse import unquote
 import logging
 
 
@@ -16,6 +16,21 @@ __all__ = [
 _log = logging.getLogger(__name__)
 
 
+def parse_query_string(query):
+    queries = {}
+    if len(query) != 0:
+        for k, v in map(lambda item: item.split(b"="), query.split(b"&")):
+            k, v = unquote(k.decode("ascii")), unquote(v.decode("ascii"))
+            if k in queries:
+                if len(queries[k]) == 1:
+                    queries[k] = [queries[k]]
+                queries[k].append(v)
+            else:
+                queries[k] = v
+    return queries
+
+
+
 class RequestInfo:
     __slots__ = (
         "server",
@@ -24,7 +39,7 @@ class RequestInfo:
         "method",
         "root_path",
         "path",
-        "query_string",
+        "query",
         "headers",
         "_receive",
         "body"
@@ -35,7 +50,7 @@ class RequestInfo:
     method: str
     root_path: str
     path: str
-    query_string: bytes
+    query: dict
     headers: dict[str, bytes]
 
     def __init__(self, receive, *args, **kwargs):
@@ -59,7 +74,7 @@ class RequestInfo:
             scope["method"],
             scope["root_path"],
             scope["path"],
-            scope["query_string"],
+            parse_query_string(scope["query_string"]),
             headers
         )
 

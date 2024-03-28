@@ -12,6 +12,7 @@ import re
 import os
 import secrets
 import logging
+import mimetypes
 from dotenv import load_dotenv
 
 
@@ -94,13 +95,38 @@ async def upload(req: RequestInfo):
         path, content_type = result
         code = secrets.token_urlsafe(8)
         db.add_file(code, os.path.split(path)[-1], content_type)
-        return JsonResponse(200, {"url": "https://safe.sheppsu.me/%s" %code})
+        return JsonResponse(200, {"url": "https://safe.sheppsu.me/view?n=%s" % code})
     return result
 
 
 @router.route("/status")
 async def status(req: RequestInfo):
     return Response(200, body=b"OK")
+
+
+@router.route("/view", regex=True)
+async def view(req: RequestInfo):
+    filedata = db.get_file(req.query.get("n", ""))
+    if not filedata:
+        return Response(404)
+
+    mime = filedata[1]
+    with open("view.html") as f:
+        return Response(
+            200,
+            body=f.read().replace("{{ mimetype }}", mime).encode("utf-8")
+        )
+
+
+@router.route("/static/(?P<file>\S*)", regex=True)
+async def static_file(req: RequestInfo, file):
+    if not os.path.exists(f"static/{file}"):
+        return Response(404)
+
+    mime = mimetypes.guess_type(file)[0]
+    headers = {} if mime is None else {"Content-Type": mime}
+    with open(f"static/{file}", "rb") as f:
+        return Response(200, body=f.read(), headers=headers)
 
 
 @router.route(r"/(?P<code>\S*)", regex=True)
