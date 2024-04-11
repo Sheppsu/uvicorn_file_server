@@ -131,6 +131,8 @@ async def static_file(req: RequestInfo, file):
 
 @router.route(r"/(?P<code>\S*)", regex=True)
 async def query(req: RequestInfo, code):
+    if "." in code:
+        code = code.split(".")[:-1]
     filedata = db.get_file(code)
     if not filedata:
         return Response(404)
